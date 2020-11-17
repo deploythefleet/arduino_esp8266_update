@@ -68,6 +68,30 @@ void setSystemTime()
     #endif
 }
 
+void DTF_ESP8266Update::DTF_UpdateStart() {
+    #ifdef DTF_DEBUG
+    Serial.println("Callback: OTA Update Started");
+    #endif
+}
+
+void DTF_ESP8266Update::DTF_UpdateFinished() {
+    #ifdef DTF_DEBUG
+    Serial.println("Callback: OTA Update Finished Successfully");
+    #endif
+}
+
+void DTF_ESP8266Update::DTF_UpdateProgress(int _current, int _total) {
+    float percentage = ((float)_current/(float)_total) * 100;
+
+    #ifdef DTF_DEBUG
+    Serial.print("[");
+    for (int i=1; i<=(int)percentage; i++) {
+        Serial.print("+");
+    }
+    Serial.println("]");
+    #endif
+}
+
 DTF_UpdateResponse DTF_ESP8266Update::getFirmwareUpdate(const char* updateUrl, const char* currentVersion, bool setTime)
 {
     static BearSSL::X509List x509(rootCACertificate);
