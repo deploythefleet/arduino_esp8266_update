@@ -111,6 +111,11 @@ DTF_UpdateResponse DTF_ESP8266Update::getFirmwareUpdate(const char* updateUrl, c
     client.setTrustAnchors(&x509);
     client.setTimeout(20); // 20 second timeout
 
+    // Callbacks setting
+    ESPhttpUpdate.onStart(DTF_UpdateStart);
+    ESPhttpUpdate.onEnd(DTF_UpdateFinished);
+    ESPhttpUpdate.onProgress(DTF_UpdateProgress);
+
     // The following line invokes the update library and will send all necessary headers
     // to Deploy the Fleet for it to decision an update. Make sure the version argument
     // is always accurate as this is used to determine if a device needs an update or not.
