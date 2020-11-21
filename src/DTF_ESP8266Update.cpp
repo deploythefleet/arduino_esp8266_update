@@ -81,15 +81,22 @@ void DTF_ESP8266Update::DTF_UpdateFinished() {
 }
 
 void DTF_ESP8266Update::DTF_UpdateProgress(int _current, int _total) {
-    float percentage = ((float)_current/(float)_total) * 100;
-
-    #ifdef DTF_DEBUG
-    Serial.print("[");
-    for (int i=1; i<=(int)percentage; i++) {
-        Serial.print("+");
+    static int last_percentage = 0;
+    if (last_percentage >= 100) {
+        return;
     }
-    Serial.println("]");
-    #endif
+
+    int percentage = (int)((float)_current/(float)_total * 100);
+
+    if ((percentage >= (last_percentage + 10)) || percentage == 100) {
+        last_percentage = percentage;
+        #ifdef DTF_DEBUG
+        Serial.print("+");
+        if (percentage >= 100) {
+            Serial.println();
+        }
+        #endif
+    }
 }
 
 DTF_UpdateResponse DTF_ESP8266Update::getFirmwareUpdate(const char* updateUrl, const char* currentVersion, bool setTime)
