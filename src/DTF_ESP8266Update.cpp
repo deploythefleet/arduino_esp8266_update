@@ -68,6 +68,37 @@ void setSystemTime()
     #endif
 }
 
+void DTF_ESP8266Update::DTF_UpdateStart() {
+    #ifdef DTF_DEBUG
+    Serial.println("Callback: OTA Update Started");
+    #endif
+}
+
+void DTF_ESP8266Update::DTF_UpdateFinished() {
+    #ifdef DTF_DEBUG
+    Serial.println("Callback: OTA Update Finished Successfully");
+    #endif
+}
+
+void DTF_ESP8266Update::DTF_UpdateProgress(int _current, int _total) {
+    static int last_percentage = 0;
+    if (last_percentage >= 100) {
+        return;
+    }
+
+    int percentage = (int)((float)_current/(float)_total * 100);
+
+    if ((percentage >= (last_percentage + 10)) || percentage == 100) {
+        last_percentage = percentage;
+        #ifdef DTF_DEBUG
+        Serial.print("+");
+        if (percentage >= 100) {
+            Serial.println();
+        }
+        #endif
+    }
+}
+
 DTF_UpdateResponse DTF_ESP8266Update::getFirmwareUpdate(const char* updateUrl, const char* currentVersion, bool setTime)
 {
     static BearSSL::X509List x509(rootCACertificate);
@@ -86,6 +117,11 @@ DTF_UpdateResponse DTF_ESP8266Update::getFirmwareUpdate(const char* updateUrl, c
     BearSSL::WiFiClientSecure client;
     client.setTrustAnchors(&x509);
     client.setTimeout(20); // 20 second timeout
+
+    // Callbacks setting
+    ESPhttpUpdate.onStart(DTF_UpdateStart);
+    ESPhttpUpdate.onEnd(DTF_UpdateFinished);
+    ESPhttpUpdate.onProgress(DTF_UpdateProgress);
 
     // The following line invokes the update library and will send all necessary headers
     // to Deploy the Fleet for it to decision an update. Make sure the version argument
