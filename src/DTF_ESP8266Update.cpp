@@ -143,5 +143,15 @@ DTF_UpdateResponse DTF_ESP8266Update::getFirmwareUpdate(const char* updateUrl, c
             #endif
             return DTF_UpdateResponse::NO_UPDATE_AVAILABLE;
             break;
+        
+        case HTTP_UPDATE_OK:
+            #ifdef DTF_DEBUG
+            Serial.println("Update succeeded.");
+            #endif
+            return DTF_UpdateResponse::UPDATE_SUCCEEDED;
+            break;
+        
+        default:
+            return DTF_UpdateResponse::NO_UPDATE_AVAILABLE;
     }
 }
