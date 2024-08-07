@@ -8,6 +8,16 @@ This changelog is updated with each release and should contain the following sec
   - **Security**: This notes any security-related changes
 
 ----
+# 1.0.6
+### Added
+  - Option to prevent automatic reboot of device after successful update
+  - Additional fallback server with Deploy the Fleet operated TLS certificate
+  - Library sends certificate bundle id
+
+### Changed
+  - NTP timeout reduced to 10 minutes from 16 hours
+
+----
 # 1.0.5
 This is the first release tracked in the changelog.
 

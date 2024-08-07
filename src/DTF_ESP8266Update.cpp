@@ -12,6 +12,8 @@ extern const char* cloudflare_cert;
 extern const char* deploy_the_fleet_cert;
 extern const int CERT_BUNDLE_ID;
 
+constexpr const int NTP_MAX_WAIT_TIME_IN_SECONDS = 600; // 10 minutes
+
 void setSystemTime()
 {
     configTime(0, 0, "pool.ntp.org", "time.nist.gov");
@@ -21,7 +23,7 @@ void setSystemTime()
     #endif
 
     time_t now = time(nullptr);
-    while (now < 8 * 3600 * 2) {
+    while (now < NTP_MAX_WAIT_TIME_IN_SECONDS) {
         yield();
         delay(500);
         #ifdef DTF_DEBUG
