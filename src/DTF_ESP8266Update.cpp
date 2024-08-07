@@ -5,38 +5,12 @@
 #include <time.h>
 
 #include "DTF_ESP8266Update.h"
+#define DTF_DEBUG
 
-const char* rootCACertificate PROGMEM = \
-"-----BEGIN CERTIFICATE-----\n" \
-"MIIFFjCCAv6gAwIBAgIRAJErCErPDBinU/bWLiWnX1owDQYJKoZIhvcNAQELBQAw\n" \
-"TzELMAkGA1UEBhMCVVMxKTAnBgNVBAoTIEludGVybmV0IFNlY3VyaXR5IFJlc2Vh\n" \
-"cmNoIEdyb3VwMRUwEwYDVQQDEwxJU1JHIFJvb3QgWDEwHhcNMjAwOTA0MDAwMDAw\n" \
-"WhcNMjUwOTE1MTYwMDAwWjAyMQswCQYDVQQGEwJVUzEWMBQGA1UEChMNTGV0J3Mg\n" \
-"RW5jcnlwdDELMAkGA1UEAxMCUjMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK\n" \
-"AoIBAQC7AhUozPaglNMPEuyNVZLD+ILxmaZ6QoinXSaqtSu5xUyxr45r+XXIo9cP\n" \
-"R5QUVTVXjJ6oojkZ9YI8QqlObvU7wy7bjcCwXPNZOOftz2nwWgsbvsCUJCWH+jdx\n" \
-"sxPnHKzhm+/b5DtFUkWWqcFTzjTIUu61ru2P3mBw4qVUq7ZtDpelQDRrK9O8Zutm\n" \
-"NHz6a4uPVymZ+DAXXbpyb/uBxa3Shlg9F8fnCbvxK/eG3MHacV3URuPMrSXBiLxg\n" \
-"Z3Vms/EY96Jc5lP/Ooi2R6X/ExjqmAl3P51T+c8B5fWmcBcUr2Ok/5mzk53cU6cG\n" \
-"/kiFHaFpriV1uxPMUgP17VGhi9sVAgMBAAGjggEIMIIBBDAOBgNVHQ8BAf8EBAMC\n" \
-"AYYwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMBMBIGA1UdEwEB/wQIMAYB\n" \
-"Af8CAQAwHQYDVR0OBBYEFBQusxe3WFbLrlAJQOYfr52LFMLGMB8GA1UdIwQYMBaA\n" \
-"FHm0WeZ7tuXkAXOACIjIGlj26ZtuMDIGCCsGAQUFBwEBBCYwJDAiBggrBgEFBQcw\n" \
-"AoYWaHR0cDovL3gxLmkubGVuY3Iub3JnLzAnBgNVHR8EIDAeMBygGqAYhhZodHRw\n" \
-"Oi8veDEuYy5sZW5jci5vcmcvMCIGA1UdIAQbMBkwCAYGZ4EMAQIBMA0GCysGAQQB\n" \
-"gt8TAQEBMA0GCSqGSIb3DQEBCwUAA4ICAQCFyk5HPqP3hUSFvNVneLKYY611TR6W\n" \
-"PTNlclQtgaDqw+34IL9fzLdwALduO/ZelN7kIJ+m74uyA+eitRY8kc607TkC53wl\n" \
-"ikfmZW4/RvTZ8M6UK+5UzhK8jCdLuMGYL6KvzXGRSgi3yLgjewQtCPkIVz6D2QQz\n" \
-"CkcheAmCJ8MqyJu5zlzyZMjAvnnAT45tRAxekrsu94sQ4egdRCnbWSDtY7kh+BIm\n" \
-"lJNXoB1lBMEKIq4QDUOXoRgffuDghje1WrG9ML+Hbisq/yFOGwXD9RiX8F6sw6W4\n" \
-"avAuvDszue5L3sz85K+EC4Y/wFVDNvZo4TYXao6Z0f+lQKc0t8DQYzk1OXVu8rp2\n" \
-"yJMC6alLbBfODALZvYH7n7do1AZls4I9d1P4jnkDrQoxB3UqQ9hVl3LEKQ73xF1O\n" \
-"yK5GhDDX8oVfGKF5u+decIsH4YaTw7mP3GFxJSqv3+0lUFJoi5Lc5da149p90Ids\n" \
-"hCExroL1+7mryIkXPeFM5TgO9r0rvZaBFOvV2z0gp35Z0+L4WPlbuEjN/lxPFin+\n" \
-"HlUjr8gRsI3qfJOQFy/9rKIJR0Y/8Omwt/8oTWgy1mdeHmmjk7j1nYsvC9JSQ6Zv\n" \
-"MldlTTKB3zhThV1+XWYp6rjd5JW1zbVWEkLNxE7GJThEUG3szgBVGP7pSWTUTsqX\n" \
-"nLRbwHOoq7hHwg==\n" \
-"-----END CERTIFICATE-----\n";
+extern const char* isrgrootx1_cert;
+extern const char* cloudflare_cert;
+extern const char* deploy_the_fleet_cert;
+extern const int CERT_BUNDLE_ID;
 
 void setSystemTime()
 {
@@ -99,18 +73,42 @@ void DTF_ESP8266Update::DTF_UpdateProgress(int _current, int _total) {
     }
 }
 
-DTF_UpdateResponse DTF_ESP8266Update::getFirmwareUpdate(const char* updateUrl, const char* currentVersion, bool setTime)
+DTF_UpdateResponse DTF_ESP8266Update::getFirmwareUpdate(
+    const char* updateUrl, 
+    const char* currentVersion, 
+    DTF_RebootOption rebootOption,
+    DTF_SetTimeOption setTime)
 {
-    static BearSSL::X509List x509(rootCACertificate);
+    static BearSSL::X509List x509(isrgrootx1_cert);
+    x509.append(cloudflare_cert);
+    x509.append(deploy_the_fleet_cert);
     
     #ifdef DTF_DEBUG
     Serial.println("Checking for firmware updates");
     #endif
 
+    // Append the certificate bundle ID to the update URL
+    String url = String(updateUrl);
+    url.reserve(strlen(updateUrl) + 12);
+    if(url.indexOf("?") == -1)
+    {
+        url.concat("?cb=");
+    }
+    else
+    {
+        url.concat("&cb=");
+    }
+    url.concat(CERT_BUNDLE_ID);
+
     // Ensure the current time is set and accurate
-    if (setTime)
+    if (setTime == DTF_SetTimeOption::SET_TIME)
     {
         setSystemTime();
+    }
+
+    if (rebootOption == DTF_RebootOption::NO_REBOOT)
+    {
+        ESPhttpUpdate.rebootOnUpdate(false);
     }
 
     // Create a secure client using the Let's Encrypt certificate
@@ -127,7 +125,19 @@ DTF_UpdateResponse DTF_ESP8266Update::getFirmwareUpdate(const char* updateUrl, c
     // to Deploy the Fleet for it to decision an update. Make sure the version argument
     // is always accurate as this is used to determine if a device needs an update or not.
     // Get the URL from your product dashboard in Deploy the Fleet
-    t_httpUpdate_return ret = ESPhttpUpdate.update(client, updateUrl, currentVersion);
+    t_httpUpdate_return ret = ESPhttpUpdate.update(client, url, currentVersion);
+
+    if(ret == HTTP_UPDATE_FAILED){
+        url.replace("ota.", "ota9.");
+
+        #ifdef DTF_DEBUG
+        Serial.printf("HTTP_UPDATE_FAILED Error (%d): %s\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+        Serial.print("Trying fallback server: ");
+        Serial.println(url);
+        #endif
+
+        ret = ESPhttpUpdate.update(client, url, currentVersion);
+    }
 
     switch (ret) {
         case HTTP_UPDATE_FAILED:

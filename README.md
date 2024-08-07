@@ -2,6 +2,13 @@
 
 This library simplifies integration with the [Deploy the Fleet](https://deploythefleet.io) update service enabling secure OTA updates. It is meant for projects that currently use the [ESP8266 Arduino Core](https://arduino-esp8266.readthedocs.io/) library.
 
+![badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/sidwarkd/c1275ec2d5e358d56f268223abeb3660/raw/DTF_ESP8266Update_v1.0.6.json)
+![Static Badge](https://img.shields.io/badge/not%20connecting-test?label=versions%20%3C%3D%201.0.5&color=hsl(0%2C%20100%25%2C%2040%25))
+
+
+
+
+
 ## Requirements
 
   * Project built using [ESP8266 Arduino Core](https://arduino-esp8266.readthedocs.io/) library
@@ -18,10 +25,48 @@ The library's main class implements a static `getFirmwareUpdate` function that c
 DTF_ESP8266Update::getFirmwareUpdate(DTF_UPDATE_URL, "[CURRENT VERSION OF YOUR FIRMWARE]");
 ```
 
+## Options
+
+The main call to `DTF_ESP8266Update::getFirmwareUpdate` has several default arguments defined. These additional arguments 
+can be passed to modify some behaviors of the library. The full signature of the call is:
+
+```cpp
+static DTF_UpdateResponse getFirmwareUpdate(
+    const char* updateUrl, 
+    const char* currentVersion, 
+    DTF_RebootOption rebootOption = DTF_RebootOption::REBOOT, 
+    DTF_SetTimeOption setTimeOption = DTF_SetTimeOption::DO_NOT_SET_TIME
+);   
+```
+
+You can change any of these options but they must be passed in the same order as defined in the signature.
+
+### Reboot Option
+**Default:** Reboot on successful update
+
+```cpp
+enum class DTF_RebootOption
+{
+    NO_REBOOT = 0,
+    REBOOT = 1,
+};
+```
+
+### Set Time Via NTP
+**Default:** Do not set time via NTP
+
+```cpp
+enum class DTF_SetTimeOption
+{
+    DO_NOT_SET_TIME = 0,
+    SET_TIME = 1,
+};
+```
+
 ## License
 MIT License
 
-Copyright © 2021 MakerCrew, LLC
+Copyright © 2024 MakerCrew, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
