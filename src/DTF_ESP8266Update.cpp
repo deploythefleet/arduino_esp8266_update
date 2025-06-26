@@ -9,14 +9,19 @@
 
 extern const char* isrgrootx1_cert;
 extern const char* cloudflare_cert;
-extern const char* deploy_the_fleet_cert;
 extern const int CERT_BUNDLE_ID;
 
 constexpr const int NTP_MAX_WAIT_TIME_IN_SECONDS = 600; // 10 minutes
 
+const uint8_t PROGMEM dtf_fingerprint[20] = {
+    0x35, 0x98, 0x83, 0x53, 0xAC, 0x0F, 0xA3, 0xA9,
+    0x6D, 0xF7, 0xCA, 0x5C, 0x24, 0x70, 0x83, 0xDA,
+    0x1C, 0xF0, 0x8C, 0x3E
+};
+
 void setSystemTime()
 {
-    configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+    configTime(0, 0, F("pool.ntp.org"), F("time.nist.gov"));
 
     #ifdef DTF_DEBUG
     Serial.print(F("Waiting for NTP time sync: "));
@@ -46,13 +51,13 @@ void setSystemTime()
 
 void DTF_ESP8266Update::DTF_UpdateStart() {
     #ifdef DTF_DEBUG
-    Serial.println("Callback: OTA Update Started");
+    Serial.println(F("Callback: OTA Update Started"));
     #endif
 }
 
 void DTF_ESP8266Update::DTF_UpdateFinished() {
     #ifdef DTF_DEBUG
-    Serial.println("Callback: OTA Update Finished Successfully");
+    Serial.println(F("Callback: OTA Update Finished Successfully"));
     #endif
 }
 
@@ -67,7 +72,7 @@ void DTF_ESP8266Update::DTF_UpdateProgress(int _current, int _total) {
     if ((percentage >= (last_percentage + 10)) || percentage == 100) {
         last_percentage = percentage;
         #ifdef DTF_DEBUG
-        Serial.print("+");
+        Serial.print(F("+"));
         if (percentage >= 100) {
             Serial.println();
         }
@@ -82,11 +87,10 @@ DTF_UpdateResponse DTF_ESP8266Update::getFirmwareUpdate(
     DTF_SetTimeOption setTime)
 {
     static BearSSL::X509List x509(isrgrootx1_cert);
-    x509.append(cloudflare_cert);
-    x509.append(deploy_the_fleet_cert);
+    static bool timeSet = false;
     
     #ifdef DTF_DEBUG
-    Serial.println("Checking for firmware updates");
+    Serial.println(F("Checking for firmware updates"));
     #endif
 
     // Append the certificate bundle ID to the update URL
@@ -103,9 +107,10 @@ DTF_UpdateResponse DTF_ESP8266Update::getFirmwareUpdate(
     url.concat(CERT_BUNDLE_ID);
 
     // Ensure the current time is set and accurate
-    if (setTime == DTF_SetTimeOption::SET_TIME)
+    if (setTime == DTF_SetTimeOption::SET_TIME && !timeSet)
     {
         setSystemTime();
+        timeSet = true;
     }
 
     if (rebootOption == DTF_RebootOption::NO_REBOOT)
@@ -131,10 +136,11 @@ DTF_UpdateResponse DTF_ESP8266Update::getFirmwareUpdate(
 
     if(ret == HTTP_UPDATE_FAILED){
         url.replace("ota.", "ota9.");
+        client.setFingerprint(dtf_fingerprint); // Set the fingerprint for the fallback server
 
         #ifdef DTF_DEBUG
         Serial.printf("HTTP_UPDATE_FAILED Error (%d): %s\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
-        Serial.print("Trying fallback server: ");
+        Serial.print(F("Trying fallback server: "));
         Serial.println(url);
         #endif
 
@@ -151,14 +157,14 @@ DTF_UpdateResponse DTF_ESP8266Update::getFirmwareUpdate(
 
         case HTTP_UPDATE_NO_UPDATES:
             #ifdef DTF_DEBUG
-            Serial.println("No updates are available for this device.");
+            Serial.println(F("No updates are available for this device."));
             #endif
             return DTF_UpdateResponse::NO_UPDATE_AVAILABLE;
             break;
         
         case HTTP_UPDATE_OK:
             #ifdef DTF_DEBUG
-            Serial.println("Update succeeded.");
+            Serial.println(F("Update succeeded."));
             #endif
             return DTF_UpdateResponse::UPDATE_SUCCEEDED;
             break;

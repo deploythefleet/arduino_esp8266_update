@@ -8,6 +8,13 @@ This changelog is updated with each release and should contain the following sec
   - **Security**: This notes any security-related changes
 
 ----
+# 1.0.7
+### Changed
+  - Improved memory efficiency
+  - Use DTF Root X1 fingerprint instead of full cert chain
+  - Only attempt to set NTP time once
+
+----
 # 1.0.6
 ### Added
   - Option to prevent automatic reboot of device after successful update
