@@ -24,7 +24,7 @@ class DTF_ESP8266Update
 {
     public:
         static DTF_UpdateResponse getFirmwareUpdate(
-            const char* updateUrl, 
+            const char* productId, 
             const char* currentVersion, 
             DTF_RebootOption rebootOption = DTF_RebootOption::REBOOT,
             DTF_SetTimeOption setTimeOption = DTF_SetTimeOption::SET_TIME

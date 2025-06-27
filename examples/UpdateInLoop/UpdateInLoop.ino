@@ -6,22 +6,21 @@
 
 // #define WIFI_SSID       "" // The name of your WiFi network
 // #define WIFI_PASSWORD   "" // Your WiFi network password
-// #define DTF_UPDATE_URL  "" // Your product update url from the Deploy the Fleet dashboard
+// #define DTF_PRODUCT_ID  "" // Your product id from the Deploy the Fleet settings
 // String CURRENT_VERSION = ""; // The version of this firmware to be sent to Deploy the Fleet for update decisioning
 
 #ifndef WIFI_SSID
 #error You must define WIFI_SSID and WIFI_PASSWORD
 #endif
 
-#ifndef DTF_UPDATE_URL
-#error You must provide your Deploy the Fleet update url in the DTF_UPDATE_URL define at the top of the file
+#ifndef DTF_PRODUCT_ID
+#error You must provide your Deploy the Fleet product id in the DTF_PRODUCT_ID define at the top of the file
 #endif
 
 ESP8266WiFiMulti WiFiMulti;
 
 void setup() {
   // put your setup code here, to run once:
-    // put your setup code here, to run once:
   Serial.begin(115200);
 
   Serial.println();
@@ -48,7 +47,7 @@ void loop() {
       if (!checkedForUpdates)
       {
         checkedForUpdates = true; // don't check for updates again
-        DTF_ESP8266Update::getFirmwareUpdate(DTF_UPDATE_URL, CURRENT_VERSION.c_str());
+        DTF_ESP8266Update::getFirmwareUpdate(DTF_PRODUCT_ID, CURRENT_VERSION.c_str());
       }
     Serial.println("This is version " + CURRENT_VERSION);
     delay(5000);

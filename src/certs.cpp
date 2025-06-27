@@ -1,13 +1,8 @@
 #include "pgmspace.h"
 
 extern const char* isrgrootx1_cert;
-extern const char* cloudflare_cert;
-extern const char* deploy_the_fleet_cert;
-extern const int CERT_BUNDLE_ID;
 
-constexpr const int CERT_BUNDLE_ID = 1;
-
-const char* isrgrootx1_cert PROGMEM = \
+const char* isrgrootx1_cert PROGMEM = 
 "-----BEGIN CERTIFICATE-----\n" \
 "MIIFazCCA1OgAwIBAgIRAIIQz7DSQONZRGPgu2OCiwAwDQYJKoZIhvcNAQELBQAw\n" \
 "TzELMAkGA1UEBhMCVVMxKTAnBgNVBAoTIEludGVybmV0IFNlY3VyaXR5IFJlc2Vh\n" \
