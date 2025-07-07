@@ -8,6 +8,14 @@ This changelog is updated with each release and should contain the following sec
   - **Security**: This notes any security-related changes
 
 ----
+# 2.0.0
+
+Initial version to support v2 of Deploy the Fleet
+
+### Changed
+  - `getFirmwareUpdate` now accepts a product ID instead of a full update URL
+
+----
 # 1.0.7
 ### Changed
   - Improved memory efficiency
