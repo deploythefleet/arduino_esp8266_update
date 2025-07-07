@@ -8,15 +8,14 @@
 #define DTF_DEBUG
 
 extern const char* isrgrootx1_cert;
-extern const char* cloudflare_cert;
-extern const int CERT_BUNDLE_ID;
 
-constexpr const int NTP_MAX_WAIT_TIME_IN_SECONDS = 600; // 10 minutes
+static constexpr const int NTP_MAX_WAIT_TIME_IN_SECONDS = 600; // 10 minutes
+static constexpr const char* primaryUpdateUrl = "https://ota2.deploythefleet.com/update";
 
 const uint8_t PROGMEM dtf_fingerprint[20] = {
-    0x35, 0x98, 0x83, 0x53, 0xAC, 0x0F, 0xA3, 0xA9,
-    0x6D, 0xF7, 0xCA, 0x5C, 0x24, 0x70, 0x83, 0xDA,
-    0x1C, 0xF0, 0x8C, 0x3E
+  0x39, 0xFF, 0x5D, 0x36, 0x91, 0x25, 0x79, 0xE6, 
+  0x58, 0x51, 0x61, 0x5B, 0x7B, 0x88, 0x61, 0x87, 
+  0xB0, 0x95, 0xD8, 0x50
 };
 
 void setSystemTime()
@@ -81,7 +80,7 @@ void DTF_ESP8266Update::DTF_UpdateProgress(int _current, int _total) {
 }
 
 DTF_UpdateResponse DTF_ESP8266Update::getFirmwareUpdate(
-    const char* updateUrl, 
+    const char* productId, 
     const char* currentVersion, 
     DTF_RebootOption rebootOption,
     DTF_SetTimeOption setTime)
@@ -93,18 +92,7 @@ DTF_UpdateResponse DTF_ESP8266Update::getFirmwareUpdate(
     Serial.println(F("Checking for firmware updates"));
     #endif
 
-    // Append the certificate bundle ID to the update URL
-    String url = String(updateUrl);
-    url.reserve(strlen(updateUrl) + 12);
-    if(url.indexOf("?") == -1)
-    {
-        url.concat("?cb=");
-    }
-    else
-    {
-        url.concat("&cb=");
-    }
-    url.concat(CERT_BUNDLE_ID);
+    String url = String(primaryUpdateUrl) + "?p=" + String(productId);
 
     // Ensure the current time is set and accurate
     if (setTime == DTF_SetTimeOption::SET_TIME && !timeSet)
@@ -131,11 +119,10 @@ DTF_UpdateResponse DTF_ESP8266Update::getFirmwareUpdate(
     // The following line invokes the update library and will send all necessary headers
     // to Deploy the Fleet for it to decision an update. Make sure the version argument
     // is always accurate as this is used to determine if a device needs an update or not.
-    // Get the URL from your product dashboard in Deploy the Fleet
     t_httpUpdate_return ret = ESPhttpUpdate.update(client, url, currentVersion);
 
     if(ret == HTTP_UPDATE_FAILED){
-        url.replace("ota.", "ota9.");
+        url.replace("ota2.", "ota4.");
         client.setFingerprint(dtf_fingerprint); // Set the fingerprint for the fallback server
 
         #ifdef DTF_DEBUG
